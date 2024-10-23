@@ -1,0 +1,42 @@
+La simulation des piétons ou des foules, comme dans l'espace public, est un
+problème complexe et à fort enjeux [1]. De part la complexité du comportement
+humain et son imprévisibilité, la plupart des simulations reposent sur des
+modèles d'interaction physiques, où le comportement de chaque piéton est régit
+par un ensemble de forces (comme le modèle des forces sociales) [3,4,7,8].
+Cependant, dans la réalité, de nombreuses interactions entre piétons, en
+particulier dans des espaces très contraints, requièrent des interactions verbales
+ou gestuelles et des négociations pour la résolution de conflits. Dans ce stage, on
+s’intéressera à modéliser les préférences des agents et à définir des modes
+d'interactions et de coopération pouvant être traités comme des jeux (eg. choix
+social, théorie des jeux). On débutera le stage par un état de l'art sur les travaux
+existants dans cette direction (comme [2,5,6]), puis on proposera un premier
+modèle d'interaction sociale pour la résolution de conflits spatiaux entre 2 puis
+plusieurs pétions. Si le temps le permet, on s'intéressera au problème de
+l'intégration d'un tel modèle dans un outil de simulation de piétons utilisant par
+défaut des comportements régit par des forces sociales.
+
+Références
+[1] Cugurullo, F., Acheampong, R. A., Gueriau, M., & Dusparic, I. (2020). The
+transition to autonomous cars, the redesign of cities and the future of urban
+sustainability. Urban Geography, 1-27
+[2] Annemarie Turnwald, Dirk Wollherr, Human-Like Motion Planning Based on
+Game Theoretic Decision Making, International Journal of Social Robotics (2019)
+11:151–170.
+[3] Bresson, R., Saraydaryan, J., Dugdale, J., & Spalanzani, A. (2019). Socially
+Compliant Navigation in dense crowds. In 2019 IEEE Intelligent Vehicles
+Symposium (IV) (pp.64-69) IEEE.
+[4] Prédhumeau, M., Mancheva, L., Dugdale, J., & Spalanzani, A. (2022). Agent-
+Based Modeling for Predicting Pedestrian Trajectories Around an Autonomous
+Vehicle. Journal of Artificial Intelligence Research , 73, 1385-1433.
+[5] Bonnemain, T., Butano, M., Bonnet, T., Echeverría-Huarte, I., Seguin, A.,
+Nicolas, A., ... & Ullmo, D. (2022). Pedestrians in static crowds are not grains, but
+game players. arXiv preprint arXiv:2201.08592.
+[6] Roge, A.(2023) Crowds response to their crossing by an autonomous vehicle.
+Rapport de stage de Master 2, CNRS, ILM Lyon, CITI lab, INSA Lyon.
+[7] Manon Prédhumeau, Lyuba Mancheva, Julie Dugdale, Anne Spalanzani (2021)
+An Agent-Based Model to Predict Pedestrians Trajectories with an Autonomous
+Vehicle in Shared Spaces AAMAS 2021 – 20th International Conference on
+Autonomous Agents and Multiagent Systems.
+[8] Manon Prédhumeau (décembre 2021) Modélisation et simulation de
+comportements piétons réalistes en espace partagé avec un véhicule autonome,
+Thèse de l’Université de Grenoble Alpes.
