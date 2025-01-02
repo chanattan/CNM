@@ -127,14 +127,23 @@ class Planner:
             results.append((self.reformat(self.agents, best.solution),))
             return
         # Calculate new constraints
+        print("agent i:", agent_i)
+        print("agent j:", agent_j)
+        print("time of conflict:", time_of_conflict)
         agent_i_constraint = self.calculate_constraints(best, agent_i, agent_j, time_of_conflict)
         agent_j_constraint = self.calculate_constraints(best, agent_j, agent_i, time_of_conflict)
+
+        print("agent 1 constraint:", agent_i_constraint)
+        print("agent 2 constraint:", agent_j_constraint)
 
         # Calculate new paths
         agent_i_path = self.calculate_path(agent_i,
                                            agent_i_constraint)
         agent_j_path = self.calculate_path(agent_j,
                                            agent_j_constraint)
+        
+        print("calculated path for agent 1:", agent_i_path)
+        print("calculated path for agent 2:", agent_i_path)
 
         # Replace old paths with new ones in solution
         solution_i = best.solution
@@ -159,19 +168,37 @@ class Planner:
     def validate_paths(self, agents, node: CTNode):
         # Check collision pair-wise
         for agent_i, agent_j in combinations(agents, 2):
-            time_of_conflict = self.safe_distance(node.solution, agent_i, agent_j)
+            time_of_conflict = self.collides(node.solution, agent_i, agent_j)
             # time_of_conflict=1 if there is not conflict
             if time_of_conflict == -1:
                 continue
             return agent_i, agent_j, time_of_conflict
         return None, None, -1
 
-
-    def safe_distance(self, solution: Dict[Agent, np.ndarray], agent_i: Agent, agent_j: Agent) -> int:
-        for idx, (point_i, point_j) in enumerate(zip(solution[agent_i], solution[agent_j])):
-            if self.dist(point_i, point_j) > 2*self.robot_radius:
-                continue
-            return idx
+    def collides(self, solution: Dict[Agent, np.ndarray], agent_i: Agent, agent_j: Agent) -> int:
+        #for idx, (point_i, point_j) in enumerate(zip(solution[agent_i], solution[agent_j])):
+            #if self.dist(point_i, point_j) > 2*self.robot_radius:
+                #continue
+            #return idx
+        path1, path2 = solution[agent_i], solution[agent_j]
+        if len(path2) < len(path1):
+            path1, path2 = path2, path1
+        # Bias of collision: the crossing is considered more important as an imminent collision
+        # Bias of selection: the shortest path is considered with the colliding point, i.e., the agent with the longest path is the obstacle   
+        # Common path
+        for i in range(len(path1)-1):
+            p1 = path1[i]
+            p1_n = path1[i+1]
+            p2 = path2[i]
+            # Crossing paths
+            if p1_n[0] == p2[0] and p1_n[1] == p2[1]:
+                return i # (p2[0], p2[1])
+            # Virtual obstacle
+            if p1[0] == p2[0] and p1[1] == p2[1]:
+                return i # (p1[0], p1[1])
+        # Check last cell which cannot be crossing path as it has already been checked
+        if path1[len(path1)-1][0] == path2[len(path1)-1][0] and path1[len(path1)-1][1] == path2[len(path1)-1][1]:
+            return len(path1) - 1 # (path1[len(path1)-1][0], path1[len(path1)-1][1])
         return -1
 
     @staticmethod
@@ -216,7 +243,7 @@ class Planner:
         v_grid = deepcopy(grid)
         for s in constraints.values():
             for (x, y) in s:
-                v_grid[y][x] = 1 # Obstacle
+                v_grid[y][x] = 0 # Obstacle
         return v_grid
 
     '''
@@ -228,7 +255,7 @@ class Planner:
                     width=len(self.grid[0]),
                     matrix = self.translate_constraints(constraints.setdefault(agent, dict()), self.grid),
                     inverse=False, grid_id=1)
-        finder = AStarFinder(diagonal_movement = DiagonalMovement.always)
+        finder = AStarFinder(diagonal_movement = DiagonalMovement.if_at_most_one_obstacle)
         ss = list(agent.start)
         ee = list(agent.goal)
         start = grid.node(ss[0], ss[1])
