@@ -74,8 +74,6 @@ class Planner:
         # Compute path for each agent using low level planner
         solution = dict((agent, self.calculate_path(agent, constraints)) for agent in self.agents)
 
-        print("--- solutions:", solution)
-
         open = []
         if all(len(path) != 0 for path in solution.values()):
             # Make root node
@@ -139,25 +137,44 @@ class Planner:
         # Calculate new paths
         agent_i_path = self.calculate_path(agent_i,
                                            agent_i_constraint)
+        agent_i_path2 = self.calculate_path(agent_i, agent_j_constraint)
         agent_j_path = self.calculate_path(agent_j,
                                            agent_j_constraint)
+        agent_j_path2 = self.calculate_path(agent_j, agent_i_constraint)
         
-        print("calculated path for agent 1:", agent_i_path)
-        print("calculated path for agent 2:", agent_i_path)
+        print("calculated path 1 for agent 1:", agent_i_path)
+        print("calculated path 1 for agent 2:", agent_i_path)
+        print("calculated path 2 for agent 1:", agent_i_path2)
+        print("calculated path 2 for agent 2:", agent_j_path2)
 
         # Replace old paths with new ones in solution
         solution_i = best.solution
         solution_j = deepcopy(best.solution)
-        solution_i[agent_i] = agent_i_path
-        solution_j[agent_j] = agent_j_path
+        fst = True
+        if len(agent_i_path) > 0:
+            solution_i[agent_i] = agent_i_path
+            solution_j[agent_j] = agent_j_path2
+        else:
+            solution_i[agent_i] = agent_i_path2
+            solution_j[agent_j] = agent_j_path if len(agent_j_path) > 0 else np.concatenate((np.array([agent_j_path2[0]]), agent_j_path2))
+            fst = False
+        #if len(agent_j_path) > 0:
+        #    solution_j[agent_j] = agent_j_path
+        #    solution_j[agent_i] = agent_i_path2
+        #else:
+        # Replace old paths with new ones in solution
+        #solution_i = best.solution
+        #solution_j = deepcopy(best.solution)
+        #solution_i[agent_i] = agent_i_path
+        #solution_j[agent_j] = agent_j_path
 
         node_i = None
         if all(len(path) != 0 for path in solution_i.values()):
-            node_i = CTNode(agent_i_constraint, solution_i)
+            node_i = CTNode(agent_i_constraint if fst else agent_j_constraint, solution_i)
 
         node_j = None
         if all(len(path) != 0 for path in solution_j.values()):
-            node_j = CTNode(agent_j_constraint, solution_j)
+            node_j = CTNode(agent_j_constraint if fst else agent_i_constraint, solution_j)
 
         results.append((node_i, node_j))
 
@@ -215,7 +232,7 @@ class Planner:
         pivot = unchanged_path[time_of_conflict]
         conflict_end_time = time_of_conflict
         try:
-            while self.dist(contrained_path[conflict_end_time], pivot) < 2*self.robot_radius:
+            while self.dist(contrained_path[conflict_end_time], pivot) < 1:
                 conflict_end_time += 1
         except IndexError:
             pass
@@ -238,7 +255,6 @@ class Planner:
         '''
             The modeled constraints in CBS are time-based. In this translation, conflicts
             are considered as virtual static obstacles present on the grid.
-            In some sort, there is a projection of time to a fixed time.
         '''
         v_grid = deepcopy(grid)
         for s in constraints.values():
