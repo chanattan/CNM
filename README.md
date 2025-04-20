@@ -27,6 +27,9 @@ Please see both the code ("Evaluation" before the Visualization) and the article
 
 At the bottom of the Jupyter notebook you will find both Evaluation and Experiment results cells, the first evaluates according to the defined metrics in the article. The latter compares and displays them with manual input taken from the earlier cell. More details on how the comparison is made is available in the article.
 
+## Other
+The other folders are mainly related to the article's presentation, you can check them out if you want. Some figures may be outdated, please refer to the code or the article for more reliable information.
+
 # Related article
 
 JFSMA 2025 - Article #13: soon to appear.
