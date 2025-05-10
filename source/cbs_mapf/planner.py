@@ -125,14 +125,16 @@ class Planner:
             results.append((self.reformat(self.agents, best.solution),))
             return
         # Calculate new constraints
-        print("agent i:", agent_i)
-        print("agent j:", agent_j)
-        print("time of conflict:", time_of_conflict)
+        if self.debug:
+            print("agent i:", agent_i)
+            print("agent j:", agent_j)
+            print("time of conflict:", time_of_conflict)
         agent_i_constraint = self.calculate_constraints(best, agent_i, agent_j, time_of_conflict)
         agent_j_constraint = self.calculate_constraints(best, agent_j, agent_i, time_of_conflict)
 
-        print("agent 1 constraint:", agent_i_constraint)
-        print("agent 2 constraint:", agent_j_constraint)
+        if self.debug:
+            print("agent 1 constraint:", agent_i_constraint)
+            print("agent 2 constraint:", agent_j_constraint)
 
         # Calculate new paths
         agent_i_path = self.calculate_path(agent_i,
@@ -142,21 +144,22 @@ class Planner:
                                            agent_j_constraint)
         agent_j_path2 = self.calculate_path(agent_j, agent_i_constraint)
         
-        print("calculated path 1 for agent 1:", agent_i_path)
-        print("calculated path 1 for agent 2:", agent_i_path)
-        print("calculated path 2 for agent 1:", agent_i_path2)
-        print("calculated path 2 for agent 2:", agent_j_path2)
+        if self.debug:
+            print("calculated path 1 for agent 1:", agent_i_path)
+            print("calculated path 1 for agent 2:", agent_i_path)
+            print("calculated path 2 for agent 1:", agent_i_path2)
+            print("calculated path 2 for agent 2:", agent_j_path2)
 
         # Replace old paths with new ones in solution
         solution_i = best.solution
         solution_j = deepcopy(best.solution)
         fst = True
         if len(agent_i_path) > 0:
-            solution_i[agent_i] = agent_i_path
+            solution_j[agent_i] = agent_i_path
             solution_j[agent_j] = agent_j_path2
         else:
-            solution_i[agent_i] = agent_i_path2
-            solution_j[agent_j] = agent_j_path if len(agent_j_path) > 0 else np.concatenate((np.array([agent_j_path2[0]]), agent_j_path2))
+            solution_j[agent_i] = agent_i_path2 if len(agent_i_path2) > 0 else np.array([agent_i.start])
+            solution_j[agent_j] = agent_j_path if len(agent_j_path) > 0 else np.concatenate((np.array([agent_j_path2[0]]) if len(agent_j_path2) > 0 else np.array(agent_j.start), agent_j_path2), axis=0)
             fst = False
         #if len(agent_j_path) > 0:
         #    solution_j[agent_j] = agent_j_path
@@ -203,19 +206,37 @@ class Planner:
         # Bias of collision: the crossing is considered more important as an imminent collision
         # Bias of selection: the shortest path is considered with the colliding point, i.e., the agent with the longest path is the obstacle   
         # Common path
-        for i in range(len(path1)-1):
-            p1 = path1[i]
-            p1_n = path1[i+1]
-            p2 = path2[i]
-            # Crossing paths
-            if p1_n[0] == p2[0] and p1_n[1] == p2[1]:
-                return i # (p2[0], p2[1])
+        p1, p1_n, p2, p2_n = None, None, None, None
+        if np.ndim(path1) == 1:
+            p1 = path1[0]
+            p1_n = path1[1]
+        else:
+            p1 = path1[0][0]
+            p1_n = path1[0][1]
+        if np.ndim(path2) == 1:
+            p2 = path2[0]
+            p2_n = path2[1]
+        else:
+            p2 = path2[0][0]
+            p2_n = path2[0][1]
+        if np.ndim(path1) == 1 or np.ndim(path2) == 1:
             # Virtual obstacle
-            if p1[0] == p2[0] and p1[1] == p2[1]:
-                return i # (p1[0], p1[1])
-        # Check last cell which cannot be crossing path as it has already been checked
-        if path1[len(path1)-1][0] == path2[len(path1)-1][0] and path1[len(path1)-1][1] == path2[len(path1)-1][1]:
-            return len(path1) - 1 # (path1[len(path1)-1][0], path1[len(path1)-1][1])
+            if p1 == p2 and p1_n == p2_n:
+                return 0 # (p1[0], p1[1])
+        else:
+            for i in range(len(path1)-1):
+                p1 = path1[i]
+                p1_n = path1[i+1]
+                p2 = path2[i]
+                # Virtual obstacle
+                if p1[0] == p2[0] and p1[1] == p2[1]:
+                    return i # (p1[0], p1[1])
+                # Crossing paths
+                if p1_n[0] == p2[0] and p1_n[1] == p2[1]:
+                    return i # (p2[0], p2[1])
+            # Check last cell which cannot be crossing path as it has already been checked
+            if path1[len(path1)-1][0] == path2[len(path1)-1][0] and path1[len(path1)-1][1] == path2[len(path1)-1][1]:
+                return len(path1) - 1 # (path1[len(path1)-1][0], path1[len(path1)-1][1])
         return -1
 
     @staticmethod
