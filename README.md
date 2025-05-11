@@ -30,6 +30,10 @@ At the bottom of the Jupyter notebook you will find both Evaluation and Experime
 ## Other
 The other folders are mainly related to the article's presentation, you can check them out if you want. Some figures may be outdated, please refer to the code or the article for more reliable information. You can find videos with not-up-to-date visualizations but still the same CNM shown in the folder "videos". Also, "experiments.*" videos were first-shot videos of the comparison between CNM and SFM. CBS-MAPF was not included at first at it only ran for the first three maps.
 
+## An error
+The development is still ongoing. If there is an unexpected the error when running a cell, please try to rerun all the above cells.
+Otherwise, please file an issue.
+
 # Related article
 
 JFSMA 2025 - Article #13: soon to appear.
